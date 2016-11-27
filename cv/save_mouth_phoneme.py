@@ -97,7 +97,7 @@ for speaker_index, speaker in enumerate(speakers):
 				#print '        skip'
 				continue
 			img = cv2.imread(frame_folder + '/' + frame_filename)
-			frames.append(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY))
+			frames.append(img)
 
 		phonemes = phoneme_timings[speaker][video]
 		timings_end = float(phonemes[-1])
@@ -124,25 +124,29 @@ for speaker_index, speaker in enumerate(speakers):
 			assert len(timed_frames) == 10
 
 			for frame_index, frame in enumerate(timed_frames):
-				mouths = mouth_cascade.detectMultiScale(frame, 1.3, 5)
-				biggestMouthArea = 0
-				biggestMouth = 0,0,0,0
-				for (x,y,w,h) in mouths:
-					if w*h > biggestMouthArea:
-						biggestMouthArea = w*h
-						biggestMouth = x,y,w,h
-				x,y,w,h = biggestMouth
+				# mouths = mouth_cascade.detectMultiScale(frame, 1.3, 5)
+				# biggestMouthArea = 0
+				# biggestMouth = 0,0,0,0
+				# for (x,y,w,h) in mouths:
+				# 	if w*h > biggestMouthArea:
+				# 		biggestMouthArea = w*h
+				# 		biggestMouth = x,y,w,h
+				# x,y,w,h = biggestMouth
+				
+				# cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
+				# cv2.imshow('img',frame)
+				# cv2.waitKey(0)
 
-				start_x = (x+w-mouth_width)/2
-				end_x = (x+w+mouth_width)/2
-				start_y = (y+h-mouth_height)/2
-				end_y = (y+h+mouth_height)/2
-				cropped_sized_mouth = frame[start_y:end_y, start_x:end_x]
-				cv2.imwrite("%s_%s_%02d.jpg" % (speaker, phoneme, frame_index+1), cropped_sized_mouth)
+				# start_x = (x+w-mouth_width)/2
+				# end_x = (x+w+mouth_width)/2
+				# start_y = (y+h-mouth_height)/2
+				# end_y = (y+h+mouth_height)/2
+				# cropped_sized_mouth = frame[start_y:end_y, start_x:end_x]
+				# cv2.imwrite("%s_%s_%02d.jpg" % (speaker, phoneme, frame_index+1), cropped_sized_mouth)
 				
 				#cv2.CreateImage( mouth_height, mouth_width, frame.depth, frame.nChannels)
-			t()
-				
+
+				cv2.imwrite("%s_%s_%s_%02d.jpg" % (speaker, video, phoneme, frame_index+1), frame)
 
 		#save as .jpg, 00 pad
 		#same width and height
