@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 from pdb import set_trace as t
 import os
-import random
+import random, math
 
 def interpolate(prev_frame, next_frame):
 	# to do: figure out interpolation
@@ -70,12 +70,17 @@ for sentence_line in sentence_lines:
 os.chdir(phoneme_mouth_frames_folder)
 
 speakers = os.listdir(data_folder)
+already_done = ['fadg0', 'faks0','fcft0','fcmh0', 'fcmr0', 'fcrh0', 'fdac1', 'fdms0', 'fdrd1', 'fedw0', 'felc0', 'fgjd0', 'fjas0', 'fjem0', 'fjre0', 'fjwb0', 'fkms0', 'fpkt0', 'fram1', 'mabw0', 'mbdg0', 'mbjk0', 'mccs0', 'mcem0', 'mdab0', 'mdbb0', 'mdld0', 'mgwt0', 'mjar0', 'mjsw0', 'mmdb1', 'mmdm2', 'mpdf0']
 
 for speaker_index, speaker in enumerate(speakers):
 	print 'speaker ' + str(speaker_index) + '/' + str(len(speakers)) + ': ' + speaker
 	#if not formatted data file (starting with f for female or m for male), skip 
 	if speaker[0] != 'f' and speaker[0] != 'm':
 		print 'skip'
+		continue
+
+	if speaker in already_done:
+		print 'already done'
 		continue
 	
 	video_folder = data_folder + speaker + '/video/'
@@ -85,6 +90,10 @@ for speaker_index, speaker in enumerate(speakers):
 		#if not a sentence video folder, skip
 		if video[0] != 's':
 			print '    skip'
+			continue
+
+		if video not in phoneme_timings[speaker].keys():
+			print '    video not in phoneme timing .txt'
 			continue
 
 		#cop them frames
@@ -111,16 +120,20 @@ for speaker_index, speaker in enumerate(speakers):
 			start_timing = float(phonemes[phoneme_index + 1])
 			end_timing = float(phonemes[phoneme_index + 2])
 
-			start_frame = int(round(start_timing*n_frames/timings_end) + 1)
-			end_frame = int(round(end_timing*n_frames/timings_end) + 1)
+			start_frame = int(round(start_timing*n_frames/timings_end))
+			end_frame = int(math.floor(end_timing*n_frames/timings_end))
 			phoneme_frames = []
 
+			
 			#extra +1 because range is end exclusive
 			for frame_index in range(start_frame, end_frame + 1):
 				phoneme_frames.append(frames[frame_index])
 
-			
+			if len(phoneme_frames) == 0:
+				continue
+
 			timed_frames = time_frames(frames_per_phoneme, phoneme_frames)
+
 			assert len(timed_frames) == 10
 
 			for frame_index, frame in enumerate(timed_frames):
