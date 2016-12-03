@@ -6,7 +6,6 @@ from pdb import set_trace as t
 import numpy as np
 
 padding = 'SAME'
-numPhonemes = 33
 
 #hyperParameters
 INIT_DEV = 0.05
@@ -32,7 +31,8 @@ def inputs(train_dir):
 		if jpegDir[-3:] != 'jpg': continue
 		specs = re.split('\_', jpegDir)
 		if specs[2] not in phonemes: phonemes.append(specs[2])
-	phonemes = sorted(phonemes)	
+	phonemes = sorted(phonemes)
+	numPhonemes = len(phonemes)
 	labels = np.empty((batch_size))
 	for jpegDir in jpegDirs:
 		#speaker_sentence_phoneme_frameNumber
@@ -50,7 +50,7 @@ def inputs(train_dir):
 	videosVar = tf.Variable(tf.zeros([batch_size, NUM_FRAMES, height, width, numChannels]), trainable=False, name = 'videos')
 	t()
 	assignOp = videosVar.assign(videos)
-	return batch_size, videosVar, labels, assignOp
+	return batch_size, videosVar, labels, assignOp, numPhonemes
 
 
 #videos = batch_size*numFrames*height*width*numChannels)
@@ -82,12 +82,18 @@ def inference(videos, batch_size):
 
 #labels is shape [batch_size], where each label is an index in [0, num_classes]
 #returns a tensor of shape [batch_size]
+#logits is batch_size*numPhonemes, where the numPhonemes entries for each video in the batch
+#hold the score corresponding to the likelihood that the video shows that phoneme
 #I probably shouldn't be naming the variables in exactly the same way the online example does
-def loss(logits, labels):
+def loss(logits, labels, batch_size):
 	labels = tf.cast(labels, tf.int64)
 	cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits, labels, name = 'cross_entropy_per_example')
 	cross_entropy_mean = tf.reduce_mean(cross_entropy, name = 'cross_entropy')
-	return cross_entropy_mean
+
+	classifications = tf.nn.in_top_k(logits, labels, 1)
+	true_classifications = np.sum(classifications)
+	accuracy = float(true_classifications)/batch_size
+	return cross_entropy_mean, accuracy
 
 
 #I probably shouldn't be naming the variables in exactly the same way the online example does
