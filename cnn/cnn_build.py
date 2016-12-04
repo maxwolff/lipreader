@@ -21,11 +21,11 @@ NUM_FRAMES = 10
 def inputs(train_dir):
 	jpegDirs = os.listdir(train_dir)
 	batch_size = len(jpegDirs)/NUM_FRAMES
-	height, width, numChannels = cv2.imread(train_dir + jpegDirs[1]).shape
+	height, width = cv2.imread(train_dir + jpegDirs[1]).shape
 	curSpecs = ['', '', '']
 	batch_index = -1
 	frame_index = 0
-	videos = np.empty((batch_size, NUM_FRAMES, height, width, numChannels))
+	videos = np.empty((batch_size, NUM_FRAMES, height, width, 1))
 	phonemes = []
 	for jpegDir in jpegDirs:
 		if jpegDir[-3:] != 'jpg': continue
@@ -44,10 +44,12 @@ def inputs(train_dir):
 			batch_index += 1
 			label = phonemes.index(specs[2])
 			labels[batch_index] = label
-		videos[batch_index, frame_index, :] = jpeg
+		for i in range(0,height):
+			for j in range(0,width):
+				videos[batch_index, frame_index, i, j, 0] = jpeg[i, j, 0]
 		frame_index += 1
 		curSpecs = specs
-	videosVar = tf.Variable(tf.zeros([batch_size, NUM_FRAMES, height, width, numChannels]), trainable=False, name = 'videos')
+	videosVar = tf.Variable(tf.zeros([batch_size, NUM_FRAMES, height, width, 1]), trainable=False, name = 'videos')
 	t()
 	assignOp = videosVar.assign(videos)
 	return batch_size, videosVar, labels, assignOp, numPhonemes
@@ -56,7 +58,7 @@ def inputs(train_dir):
 #videos = batch_size*numFrames*height*width*numChannels)
 def inference(videos, batch_size, numPhonemes):
 	#conv1
-	filterShape = [3, 5, 5, 3, 3]
+	filterShape = [3, 5, 5, 1, 1]
 	filterTensor = tf.Variable(tf.truncated_normal(filterShape, stddev = INIT_DEV), name = 'filter')
 	strides = [1, 1, 2, 2, 1]
 	conv = tf.nn.conv3d(videos, filterTensor, strides, padding)
