@@ -21,7 +21,7 @@ NUM_FRAMES = 10
 def inputs(train_dir):
 	jpegDirs = os.listdir(train_dir)
 	batch_size = len(jpegDirs)/NUM_FRAMES
-	height, width = cv2.imread(train_dir + jpegDirs[1]).shape
+	height, width, _ = cv2.imread(train_dir + jpegDirs[1]).shape
 	curSpecs = ['', '', '']
 	batch_index = -1
 	frame_index = 0
