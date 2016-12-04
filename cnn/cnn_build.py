@@ -54,7 +54,7 @@ def inputs(train_dir):
 
 
 #videos = batch_size*numFrames*height*width*numChannels)
-def inference(videos, batch_size):
+def inference(videos, batch_size, numPhonemes):
 	#conv1
 	filterShape = [3, 5, 5, 3, 3]
 	filterTensor = tf.Variable(tf.truncated_normal(filterShape, stddev = INIT_DEV), name = 'filter')
@@ -89,11 +89,8 @@ def loss(logits, labels, batch_size):
 	labels = tf.cast(labels, tf.int64)
 	cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits, labels, name = 'cross_entropy_per_example')
 	cross_entropy_mean = tf.reduce_mean(cross_entropy, name = 'cross_entropy')
-
 	classifications = tf.nn.in_top_k(logits, labels, 1)
-	true_classifications = np.sum(classifications)
-	accuracy = float(true_classifications)/batch_size
-	return cross_entropy_mean, accuracy
+	return cross_entropy_mean, classifications
 
 
 #I probably shouldn't be naming the variables in exactly the same way the online example does
@@ -105,4 +102,3 @@ def train(total_loss, step, batch_size):
 	gradients = optimizer.compute_gradients(total_loss)
 	train_op = optimizer.apply_gradients(gradients, global_step=step)
 	return train_op
-

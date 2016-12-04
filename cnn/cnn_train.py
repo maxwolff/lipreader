@@ -1,9 +1,10 @@
 import tensorflow as tf
 import cnn_build
+import numpy as np
 
 
-save_frequency = 10
-save_path = '/Users/wamsood/Documents/Classes 16-17/221/Project/model.ckpt'
+save_frequency = 2
+save_path = './model.ckpt'
 
 #hyperparamater
 max_steps = 10000
@@ -14,7 +15,7 @@ def train(train_dir, max_steps):
 	print('input')
 	logits = cnn_build.inference(videos, batch_size, numPhonemes)
 	print('logits')
-	loss, accuracy = cnn_build.loss(logits, labels, batch_size)
+	loss, classifications = cnn_build.loss(logits, labels, batch_size)
 	print('loss')
 	train_op = cnn_build.train(loss, global_step, batch_size)
 	print('train')
@@ -26,9 +27,9 @@ def train(train_dir, max_steps):
 		sess.run(assignOp)
 		print(videos.eval())
 		for step in xrange(max_steps):
-			_, _, accuracy = sess.run([train_op, loss, accuracy])
-			print 'At step', step 'accuracy =', accuracy
+			_, loss_value, accuracy = sess.run([train_op, loss, classifications])
+			print 'At step ' + str(step) + ', loss = ' +  str(loss_value) + ' and accuracy = ' + str(np.sum(accuracy)) + '/' + str(batch_size)
 			if step%save_frequency == 0:
 				saver.save(sess, save_path)
-train_dir = '/Users/wamsood/Documents/Classes 16-17/221/Project/test/'
+train_dir = './test/'
 train(train_dir, max_steps)
