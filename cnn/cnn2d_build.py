@@ -18,19 +18,20 @@ MOVING_AVERAGE_DECAY = 0.999
 #import videos
 def inputs(train_dir):
         jpegDirs = os.listdir(train_dir)
-        batch_size = len(jpegDirs) - 1
+        batch_size = 0
         height, width, _ = cv2.imread(train_dir + jpegDirs[1]).shape
-        curSpecs = ['', '', '']
-        batch_index = 0
-        videos = np.empty((batch_size, height, width, 1))
         phonemes = []
         for jpegDir in jpegDirs:
                 if jpegDir[-3:] != 'jpg': continue
+                batch_size += 1
                 specs = re.split('\_', jpegDir)
                 if specs[2] not in phonemes: phonemes.append(specs[2])
         phonemes = sorted(phonemes)
         numPhonemes = len(phonemes)
+        videos = np.empty((batch_size, height, width, 1))
         labels = np.empty((batch_size))
+        batch_index = 0
+        curSpecs = ['', '', '']
         for jpegDir in jpegDirs:
                 #speaker_sentence_phoneme_frameNumber
                 if jpegDir[-3:] != 'jpg': continue
@@ -42,7 +43,7 @@ def inputs(train_dir):
                 labels[batch_index] = phonemes.index(specs[2])
                 batch_index += 1
         videosVar = tf.Variable(tf.zeros([batch_size, height, width, 1]), trainable=False, name = 'videos')
-        t()
+        print 'matrix: reloaded'
         assignOp = videosVar.assign(videos)
         return batch_size, videosVar, labels, assignOp, numPhonemes
 

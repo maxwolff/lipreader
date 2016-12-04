@@ -50,7 +50,7 @@ def inputs(train_dir):
 		frame_index += 1
 		curSpecs = specs
 	videosVar = tf.Variable(tf.zeros([batch_size, NUM_FRAMES, height, width, 1]), trainable=False, name = 'videos')
-	t()
+	print 'matrix: reloaded'
 	assignOp = videosVar.assign(videos)
 	return batch_size, videosVar, labels, assignOp, numPhonemes
 

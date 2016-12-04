@@ -31,7 +31,7 @@ for phoneme in phonemes:
 			counter += 1
 	eigenPhoneme /= 50
 	eigenPhonemes.append(eigenPhoneme)
-t()
+print 'eigenPhonemes loaded'
 
 
 frameFolderDirs = os.listdir(inputFolder)
