@@ -9,9 +9,8 @@ padding = 'SAME'
 
 #hyperParameters
 INIT_DEV = 0.05
-NUM_EXAMPLES_PER_TRAIN_EPOCH = 50000
-NUM_EPOCHS_PER_DECAY = 200
-INIT_LEARNING_RATE = 0.1
+NUM_STEPS_PER_DECAY = 5
+INIT_LEARNING_RATE = 0.3
 LEARNING_RATE_DECAY_FACTOR = 0.1
 MOVING_AVERAGE_DECAY = 0.999
 NUM_FRAMES = 10
@@ -20,8 +19,9 @@ NUM_FRAMES = 10
 #import videos
 def inputs(train_dir):
 	jpegDirs = os.listdir(train_dir)
+	jpegDirs = sorted(jpegDirs)
 	batch_size = len(jpegDirs)/NUM_FRAMES
-	height, width = cv2.imread(train_dir + jpegDirs[1]).shape
+	height, width, _ = cv2.imread(train_dir + jpegDirs[1]).shape
 	curSpecs = ['', '', '']
 	batch_index = -1
 	frame_index = 0
@@ -97,9 +97,7 @@ def loss(logits, labels, batch_size):
 
 #I probably shouldn't be naming the variables in exactly the same way the online example does
 def train(total_loss, step, batch_size):
-	num_batches_per_epoch = NUM_EXAMPLES_PER_TRAIN_EPOCH/batch_size
-	decay_steps = num_batches_per_epoch*NUM_EPOCHS_PER_DECAY
-	lr = tf.train.exponential_decay(INIT_LEARNING_RATE, step, decay_steps, LEARNING_RATE_DECAY_FACTOR, staircase = True)
+	lr = tf.train.exponential_decay(INIT_LEARNING_RATE, step, NUM_STEPS_PER_DECAY, LEARNING_RATE_DECAY_FACTOR, staircase = True)
 	optimizer = tf.train.GradientDescentOptimizer(lr)
 	gradients = optimizer.compute_gradients(total_loss)
 	train_op = optimizer.apply_gradients(gradients, global_step=step)
