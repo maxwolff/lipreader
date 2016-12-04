@@ -8,7 +8,7 @@ test_dir = ''
 
 batch_size, images, labels, _, numPhonemes = cnn2d_build.inputs(test_dir)
 logits = cnn2d_build.inference(images, batch_size, numPhonemes)
-predictions = tf.nn.in_top_k(logits, labels, 1)
+predictions = tf.nn.in_top_k(logits, tf.cast(labels, tf.int32), 1)
 saver = tf.train.Saver()
 with tf.Session() as sess:
 	checkpoint = tf.train.get_checkpoint_state(checkpoint_dir)
