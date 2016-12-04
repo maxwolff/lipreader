@@ -84,13 +84,15 @@ def inference(videos, batch_size, numPhonemes):
 	weights1 = tf.Variable(tf.truncated_normal([dim, 200], stddev = INIT_DEV), name = 'weights1')
 	biases1 = tf.Variable(tf.zeros([200]), name = 'biases1')
 
+	local = tf.add(tf.matmul(reshape, weights1), biases1)
+
 
 
 	#softmax classifier: outputs batch_size*numPhonemes matrix
 	#randomly intialized weigts, biases are 0
 	weights2 = tf.Variable(tf.truncated_normal([200,numPhonemes], stddev = INIT_DEV), name = 'weights2')
 	biases2 = tf.Variable(tf.zeros([numPhonemes]), name = 'biases2')
-	return tf.add(tf.matmul(reshape2, weight2s), biases2)
+	return tf.add(tf.matmul(local, weights2), biases2)
 
 #labels is shape [batch_size], where each label is an index in [0, num_classes]
 #returns a tensor of shape [batch_size]
