@@ -80,7 +80,7 @@ def inference(videos, batch_size, numPhonemes):
 	pool2 = tf.nn.max_pool3d(relu2, [1,1,2,2,1], strides, padding, name = 'pool2')
 
 	reshape = tf.reshape(pool2, [batch_size, -1])
-	dim = reshape1.get_shape()[1].value
+	dim = reshape.get_shape()[1].value
 	weights1 = tf.Variable(tf.truncated_normal([dim, 200], stddev = INIT_DEV), name = 'weights1')
 	biases1 = tf.Variable(tf.zeros([200]), name = 'biases1')
 
