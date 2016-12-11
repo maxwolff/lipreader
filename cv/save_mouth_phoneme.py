@@ -77,8 +77,8 @@ for sentence_line in sentence_lines:
 os.chdir(phoneme_mouth_frames_folder)
 
 speakers = os.listdir(data_folder)
-#already_done = ['fadg0', 'faks0','fcft0','fcmh0', 'fcmr0', 'fcrh0', 'fdac1', 'fdms0', 'fdrd1', 'fedw0', 'felc0', 'fgjd0', 'fjas0', 'fjem0', 'fjre0', 'fjwb0', 'fkms0', 'fpkt0', 'fram1', 'mabw0', 'mbdg0', 'mbjk0', 'mccs0', 'mcem0', 'mdab0', 'mdbb0', 'mdld0', 'mgwt0', 'mjar0', 'mjsw0', 'mmdb1', 'mmdm2', 'mpdf0']
-already_done = []
+already_done = ['fadg0', 'faks0','fcft0','fcmh0', 'fcmr0', 'fcrh0', 'fdac1', 'fdms0', 'fdrd1', 'fedw0', 'felc0', 'fgjd0'] #, 'fjas0', 'fjem0', 'fjre0', 'fjwb0', 'fkms0', 'fpkt0', 'fram1', 'mabw0', 'mbdg0', 'mbjk0', 'mccs0', 'mcem0', 'mdab0', 'mdbb0', 'mdld0', 'mgwt0', 'mjar0', 'mjsw0', 'mmdb1', 'mmdm2', 'mpdf0']
+
 
 for speaker_index, speaker in enumerate(speakers):
 	print 'speaker ' + str(speaker_index) + '/' + str(len(speakers)) + ': ' + speaker
@@ -161,8 +161,6 @@ for speaker_index, speaker in enumerate(speakers):
 							biggest_face_area = w*h
 							biggest_face = x,y,w,h
 
-
-
 					x,y,w,h = biggest_face
 					x_crop_start = (2*x+w-face_width)/2
 					x_crop_end = x_crop_start + face_width
@@ -171,7 +169,6 @@ for speaker_index, speaker in enumerate(speakers):
 					cropped_gray = gray[y_crop_start:y_crop_end, x_crop_start:x_crop_end]
 				else:
 					print 'couldnt find face, using previous frames location'
-					print picture_names[index]
 					cropped_gray = gray[old_y_start: old_y_end, old_x_start: old_x_end]
 
 
