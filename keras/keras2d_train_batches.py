@@ -8,6 +8,7 @@ import os, sys
 import cv2
 import re
 from pdb import set_trace as t
+import time
 #hyperparameters
 samples_per_epoch = 500
 num_epochs = 1000
