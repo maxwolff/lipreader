@@ -62,7 +62,7 @@ def partition_batch(batch_size, subbatch_size, data, labels):
 data, labels, num_classes, batch_size = load_data(train_dir)
 # Convert class vectors to binary class matrices.
 labels = np_utils.to_categorical(labels, num_classes)
-t()
+
 #make smaller batches for train_on_batch
 subbatch_size = 200
 subbatches, subbatch_labels, n_subbatches = partition_batch(batch_size, subbatch_size, data, labels)
@@ -98,10 +98,12 @@ model.add(Activation('softmax'))
 sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
 model.compile(optimizer = sgd, loss = 'categorical_crossentropy', metrics = ['accuracy'])
 for i in range(0, num_epochs):
-	for b in range(n_subbatches):
+	t = time.time()
+	for b in range(n_subbatches-1):
 		model.train_on_batch(subbatches[b], subbatch_labels[b])
 		print 'batch ' + str(b) + '/' + str(n_subbatches)
-	metrics = model.train_on_batch(batch4, labels4)
-	print 'step = ' + str(i) + ':' + str(metrics)
+	metrics = model.train_on_batch(subbatches[b+1], subbatch_labels[b+1])
+
+	print 'step = ' + str(i) + ':' + str(metrics) + 'in' + str(time.time()-t)
 
 
