@@ -105,6 +105,6 @@ for i in range(0, num_epochs):
 		print 'batch ' + str(b) + '/' + str(n_subbatches)
 	metrics = model.train_on_batch(subbatches[b+1], subbatch_labels[b+1])
 
-	print 'step = ' + str(i) + ':' + str(metrics) + 'in' + str(time.time()-t)
+	print 'step = ' + str(i) + ':' + str(metrics) + ' in ' + str(time.time()-t) + ' with ' + str(subbatch_size) + ' in batch'
 
 
