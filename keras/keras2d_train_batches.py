@@ -7,13 +7,12 @@ from keras.optimizers import SGD
 import os, sys
 import cv2
 import re
-
+from pdb import set_trace as t
 #hyperparameters
 samples_per_epoch = 500
 num_epochs = 1000
 kernel_shape = (3, 3)
 num_filters = 32
-batch_size = 500
 
 
 train_dir = './phoneme_mouth_frames_3/'
@@ -21,17 +20,14 @@ train_dir = './phoneme_mouth_frames_3/'
 
 def load_data(train_dir):
 	jpegDirs = os.listdir(train_dir)
-	# batch_size = 0
+	batch_size = 0
 	height, width, _ = cv2.imread(train_dir + jpegDirs[1]).shape
 	phonemes = []
-	batch_index = 0
 	for jpegDir in jpegDirs:
 	        if jpegDir[-3:] != 'jpg': continue
-	        # batch_size += 1
-	        if batch_index >= batch_size: break
 	        specs = re.split('\_', jpegDir)
 	        if specs[2] not in phonemes: phonemes.append(specs[2])
-	        batch_index += 1
+	        batch_size += 1
 	phonemes = sorted(phonemes)
 	numPhonemes = len(phonemes)
 	data = np.empty((batch_size, height, width, 1))
@@ -40,7 +36,6 @@ def load_data(train_dir):
 	for jpegDir in jpegDirs:
 	        #speaker_sentence_phoneme_frameNumber
 	        if jpegDir[-3:] != 'jpg': continue
-	        if batch_index >= batch_size: break
 	        jpeg = cv2.imread(train_dir + jpegDir)
 	        specs = re.split('\_', jpegDir)
 	        for i in range(0,height):
@@ -51,28 +46,26 @@ def load_data(train_dir):
 	print 'matrix: reloaded'
 	return data, labels, numPhonemes, batch_size
 
+def partition_batch(batch_size, subbatch_size, data, labels):
+	subbatches = []
+	subbatch_labels = []
+	n_subbatches = 0
+	for i in range(0, batch_size, subbatch_size):
+		if (i+subbatch_size) in range(batch_size):
+			subbatches.append(data[i:i+subbatch_size])
+			subbatch_labels.append(labels[i:i+subbatch_size])
+			n_subbatches = n_subbatches + 1
+	subbatches = np.array(subbatches)
+	subbatch_labels = np.array(subbatch_labels)
+	return subbatches, subbatch_labels, n_subbatches
+
 data, labels, num_classes, batch_size = load_data(train_dir)
 # Convert class vectors to binary class matrices.
 labels = np_utils.to_categorical(labels, num_classes)
-
+t()
 #make smaller batches for train_on_batch
-subbatches = []
-subbatch_labels = []
-subbatch_size = 50
-subbatches_index = 0
-n_subbatches = 0
-for i in range(0, batch_size, subbatch_size):
-	if (i+subbatch_size) in range(batch_size):
-		subbatches.append(data[i:i+subbatch_size, :])
-		subbatch_labels.append(labels[i:i+subbatch_size, :])
-		n_subbatches = n_subbatches + 1
-subbatches = np.array(subbatches)
-subbatch_labels = np.array(subbatch_labels)
-
-
-print('data shape:', data.shape)
-print(data.shape[0], 'train samples')
-
+subbatch_size = 200
+subbatches, subbatch_labels, n_subbatches = partition_batch(batch_size, subbatch_size, data, labels)
 
 
 model = keras.models.Sequential()
@@ -104,11 +97,11 @@ model.add(Activation('softmax'))
 
 sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
 model.compile(optimizer = sgd, loss = 'categorical_crossentropy', metrics = ['accuracy'])
-
-
- for i in range(0, num_epochs):
- 	for b in range(n_subbatches):
- 		model.train_on_batch(subbatches(b,:), subbatch_labels(b,:))
- 		print 'batch ' + str(b) + '/' + str(n_subbatches)
+for i in range(0, num_epochs):
+	for b in range(n_subbatches):
+		model.train_on_batch(subbatches[b], subbatch_labels[b])
+		print 'batch ' + str(b) + '/' + str(n_subbatches)
 	metrics = model.train_on_batch(batch4, labels4)
 	print 'step = ' + str(i) + ':' + str(metrics)
+
+
