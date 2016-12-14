@@ -1,9 +1,10 @@
-#import keras, pickle
-#from keras.layers import Dense, Dropout, Activation, Convolution2D, MaxPooling2D, Flatten
+# import keras, pickle
+# from keras.layers import Dense, Dropout, Activation, Convolution2D, MaxPooling2D, Flatten
+# from keras.datasets import cifar10
+# from keras.utils import np_utils
+# from keras.optimizers import SGD
+
 import numpy as np
-#from keras.datasets import cifar10
-#from keras.utils import np_utils
-#from keras.optimizers import SGD
 import os, sys
 import cv2
 import re
@@ -70,8 +71,10 @@ def load_data(train_dir, pruned_jpgs_tuples, frames_per_phoneme):
         	for i in range(height):
         		for j in range(width):
         				data[batch_index, i, j, t_index, 0] = jpeg[i,j,0]
-        specs = re.split('\_', frame)
-        labels[batch_index] = phonemes.index(specs[2])
+	        if t_index == 0:	
+	        	specs = re.split('\_', frame)
+	        	t()
+		        labels[batch_index] = phonemes.index(specs[2])
 	print 'matrix: reloaded, took ' + str(time.time()- ti) + ' seconds'
 	return data, labels, numPhonemes, batch_size
 
@@ -100,6 +103,7 @@ actually_jpegs = [jpegDir for jpegDir in jpegDirs if 'jpg' in  jpegDir]
 frames_per_phoneme, pruned_jpgs_tuples =  get_frames_per_phoneme(actually_jpegs)
 data, labels, num_classes, batch_size = load_data(train_dir, pruned_jpgs_tuples, frames_per_phoneme)
 # Convert class vectors to binary class matrices.
+t()
 labels = np_utils.to_categorical(labels, num_classes)
 t()
 #make smaller batches for train_on_batch
