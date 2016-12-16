@@ -1,3 +1,5 @@
+# UCS Algorithm
+
 import heapq, collections, re, sys, time, os, random
 
 ############################################################
@@ -36,6 +38,7 @@ class UniformCostSearch(SearchAlgorithm):
         self.actions = None
         self.totalCost = None
         self.numStatesExplored = 0
+        self.result = ""
 
         # Initialize data structures
         frontier = PriorityQueue()  # Explored states are maintained by the frontier.
@@ -56,6 +59,7 @@ class UniformCostSearch(SearchAlgorithm):
 
             # Check if we've reached an end state; if so, extract solution.
             if problem.isEnd(state):
+                self.result = state[1]
                 self.actions = []
                 while state != startState:
                     action, prevState = backpointers[state]
@@ -67,7 +71,7 @@ class UniformCostSearch(SearchAlgorithm):
                     print "numStatesExplored = %d" % self.numStatesExplored
                     print "totalCost = %s" % self.totalCost
                     print "actions = %s" % self.actions
-                return
+                return 
 
             # Expand from |state| to new successor states,
             # updating the frontier with each newState.
