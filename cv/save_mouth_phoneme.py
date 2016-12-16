@@ -45,16 +45,23 @@ def time_frames(frames_per_phoneme, phoneme_frames):
 
 		return timed_frames
 
-frames_per_phoneme = 10
+frames_per_phoneme = 3
 
 mouth_width = 85
 mouth_height = 50
 
 mouth_cascade = cv2.CascadeClassifier('/usr/local/Cellar/opencv/2.4.13.1/share/OpenCV/haarcascades/haarcascade_mcs_mouth.xml')
 
-vidTIMIT_folder = '/Users/boraerden/Google Drive/classes/4 Senior/Seni 1/cs221/cs_221_project/vidTIMIT/'
-phoneme_mouth_frames_folder = vidTIMIT_folder + 'phoneme_mouth_frames/'
-data_folder = vidTIMIT_folder + 'data/'
+
+################################################################################
+face_cascade = cv2.CascadeClassifier('/usr/local/Cellar/opencv/2.4.13.1/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml')
+face_width = 200
+face_height = 250
+
+general_folder = '/Users/boraerden/Desktop/221 project stuff/'
+vidTIMIT_folder = general_folder + 'vidTIMIT/'
+phoneme_mouth_frames_folder = general_folder + 'phoneme_mouth_frames_3/'
+data_folder = general_folder +  'vidTIMIT/' +'data/'
 
 #get phoneme timings in dict
 phoneme_timings = {}
@@ -70,7 +77,8 @@ for sentence_line in sentence_lines:
 os.chdir(phoneme_mouth_frames_folder)
 
 speakers = os.listdir(data_folder)
-already_done = ['fadg0', 'faks0','fcft0','fcmh0', 'fcmr0', 'fcrh0', 'fdac1', 'fdms0', 'fdrd1', 'fedw0', 'felc0', 'fgjd0', 'fjas0', 'fjem0', 'fjre0', 'fjwb0', 'fkms0', 'fpkt0', 'fram1', 'mabw0', 'mbdg0', 'mbjk0', 'mccs0', 'mcem0', 'mdab0', 'mdbb0', 'mdld0', 'mgwt0', 'mjar0', 'mjsw0', 'mmdb1', 'mmdm2', 'mpdf0']
+already_done = ['fadg0', 'faks0','fcft0','fcmh0', 'fcmr0', 'fcrh0', 'fdac1', 'fdms0', 'fdrd1', 'fedw0', 'felc0', 'fgjd0'] #, 'fjas0', 'fjem0', 'fjre0', 'fjwb0', 'fkms0', 'fpkt0', 'fram1', 'mabw0', 'mbdg0', 'mbjk0', 'mccs0', 'mcem0', 'mdab0', 'mdbb0', 'mdld0', 'mgwt0', 'mjar0', 'mjsw0', 'mmdb1', 'mmdm2', 'mpdf0']
+
 
 for speaker_index, speaker in enumerate(speakers):
 	print 'speaker ' + str(speaker_index) + '/' + str(len(speakers)) + ': ' + speaker
@@ -132,34 +140,40 @@ for speaker_index, speaker in enumerate(speakers):
 			if len(phoneme_frames) == 0:
 				continue
 
-			timed_frames = time_frames(frames_per_phoneme, phoneme_frames)
+			#timed_frames = time_frames(frames_per_phoneme, phoneme_frames)
+			#assert len(timed_frames) == frames_per_phoneme
 
-			assert len(timed_frames) == 10
+			timed_frames = [phoneme_frames[0], phoneme_frames[len(phoneme_frames)/2], phoneme_frames[-1]]
+
+			
+
+			old_x_start, old_x_end, old_y_start, old_y_end = 0,0,0,0
 
 			for frame_index, frame in enumerate(timed_frames):
-				# mouths = mouth_cascade.detectMultiScale(frame, 1.3, 5)
-				# biggestMouthArea = 0
-				# biggestMouth = 0,0,0,0
-				# for (x,y,w,h) in mouths:
-				# 	if w*h > biggestMouthArea:
-				# 		biggestMouthArea = w*h
-				# 		biggestMouth = x,y,w,h
-				# x,y,w,h = biggestMouth
-				
-				# cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
-				# cv2.imshow('img',frame)
-				# cv2.waitKey(0)
+				gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+				faces = face_cascade.detectMultiScale(gray, 1.3, 5)
 
-				# start_x = (x+w-mouth_width)/2
-				# end_x = (x+w+mouth_width)/2
-				# start_y = (y+h-mouth_height)/2
-				# end_y = (y+h+mouth_height)/2
-				# cropped_sized_mouth = frame[start_y:end_y, start_x:end_x]
-				# cv2.imwrite("%s_%s_%02d.jpg" % (speaker, phoneme, frame_index+1), cropped_sized_mouth)
-				
-				#cv2.CreateImage( mouth_height, mouth_width, frame.depth, frame.nChannels)
+				if len(faces) > 0:
+					biggest_face_area = 0
+					biggest_face = 0,0,0,0
+					for (x,y,w,h) in faces:
+						if w*h > biggest_face_area:
+							biggest_face_area = w*h
+							biggest_face = x,y,w,h
 
-				cv2.imwrite("%s_%s_%s_%02d.jpg" % (speaker, video, phoneme, frame_index+1), frame)
+					x,y,w,h = biggest_face
+					x_crop_start = (2*x+w-face_width)/2
+					x_crop_end = x_crop_start + face_width
+					y_crop_start = (2*y+h-face_height)/2
+					y_crop_end = y_crop_start + face_height
+					cropped_gray = gray[y_crop_start:y_crop_end, x_crop_start:x_crop_end]
+				else:
+					print 'couldnt find face, using previous frames location'
+					cropped_gray = gray[old_y_start: old_y_end, old_x_start: old_x_end]
+
+
+				old_x_start, old_x_end, old_y_start, old_y_end = x_crop_start, x_crop_end, y_crop_start, y_crop_end
+				cv2.imwrite("%s_%s_%s_%02d.jpg" % (speaker, video, phoneme, frame_index+1), cropped_gray)
 
 		#save as .jpg, 00 pad
 		#same width and height
