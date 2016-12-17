@@ -26,7 +26,10 @@ nearest_neighbor.py
 	of 2%, just above chance.
 
 
-Data pre-processing:
+###Data pre-processing:
+save_mouth_phoneme.py
+	This script loads the phoneme timing for each speaker and video first from the allphonetime.txt.
+	It then retrieves all the frames for that phoneme, and saves the first, middle and last ones' face cropped grayscaled versions.
 
 ###Our model:
 keras3d.py
